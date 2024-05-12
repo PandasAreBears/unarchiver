@@ -2,6 +2,7 @@ from pathlib import Path
 import builtins
 import plistlib
 from typing import Any
+import base64
 import click
 import click_pathlib
 from pydantic import BaseModel, Field
@@ -37,7 +38,7 @@ class Unarchiver:
         return {k: self._value_for_uid(v) for k, v in self.archive.top.items()}
 
     def _invalid_type_warning(self, obj: Any) -> str:
-        return f"<Encountered invalid type while parsing: {type(obj).__class__.__name__}>\nPlease report a github issue."
+        return f"<ERROR: encountered invalid type while parsing: {type(obj).__class__.__name__}>\nPlease report a github issue."
 
     def _top_uid(self) -> plistlib.UID:
         root_uid: plistlib.UID | None = self.archive.top.get("root")
@@ -76,11 +77,16 @@ class Unarchiver:
         match type(self.archive.objects[uid]):
             case builtins.dict:
                 obj = self._handle_uid_as_dict(uid)
+            case builtins.bytes:
+                obj = self._handle_uid_as_bytes(uid)
             case _:
                 obj = self._handle_uid_as_primitive(uid)
 
         self.cache[uid] = obj
         return obj
+
+    def _handle_uid_as_bytes(self, uid: plistlib.UID) -> str:
+        return base64.b64encode(self.archive.objects[uid]).decode("utf-8")
 
     def _handle_uid_as_primitive(self, uid: plistlib.UID) -> Any:
         return self.archive.objects[uid]
@@ -110,15 +116,19 @@ class Unarchiver:
 
 
 @click.command()
-@click.argument("input", type=click_pathlib.Path(exists=True))
+@click.argument(
+    "keyed-archive",
+    type=click_pathlib.Path(exists=True),
+)
 @click.option(
     "--to-file",
     "-o",
-    help="A path to a file to dump unarchived content into.",
+    help="A file to dump unarchived content into.",
     type=click_pathlib.Path(exists=True),
 )
-def cli(input: Path, to_file: Path | None):
-    unarchiver = Unarchiver(input)
+def cli(keyed_archive: Path, to_file: Path | None):
+    """Unarchive an NSKeyedArchiver file."""
+    unarchiver = Unarchiver(keyed_archive)
     if to_file is not None:
         unarchiver.write(to_file)
     else:
