@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "unarchiver"
+version = "0.1.0"
+description = "Unarchive an NSKeyedArchive into a python object."
+authors = ["PandasAreBears <emailadresspanda@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+bpylist2 = "^4.1.1"
+pydantic = "^2.7.1"
+click = "^8.1.7"
+click-pathlib = "^2020.3.13.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+
+[tool.poetry.scripts]
+unarchive = "unarchiver.unarchiver:cli"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
