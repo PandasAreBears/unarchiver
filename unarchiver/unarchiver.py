@@ -109,6 +109,8 @@ class Unarchiver:
                     obj[key] = self._value_for_uid(value)
                 case builtins.list:
                     obj[key] = [self._value_for_uid(v) for v in value]
+                case builtins.bytes:
+                    obj[key] = base64.b64encode(value).decode("utf-8")
                 case _:
                     obj[key] = value
 

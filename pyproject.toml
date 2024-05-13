@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "unarchiver"
-version = "0.1.0"
+version = "0.2.0"
 description = "Unarchive an NSKeyedArchive into a python object."
 authors = ["PandasAreBears <emailadresspanda@gmail.com>"]
 readme = "README.md"
